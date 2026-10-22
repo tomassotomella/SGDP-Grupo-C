@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGDP - Panel de Analítica y Auditoría</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ml: {
+                            yellow: '#FFE600',
+                            blue: '#3483FA',
+                            blueHover: '#2968C8',
+                            green: '#00A650',
+                            red: '#D93535',
+                            purple: '#652D90',
+                            bg: '#F5F5F5',
+                            card: '#FFFFFF',
+                            textDark: '#333333',
+                            textMuted: '#666666'
+                        }
+                    },
+                    borderRadius: {
+                        'ml': '8px'
+                    },
+                    boxShadow: {
+                        'ml-soft': '0px 2px 8px rgba(0, 0, 0, 0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F5F5F5;
+            color: #333333;
+        }
+        .ml-card-shadow {
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-ml-bg text-ml-textDark">
+
+    <!-- Notificación Flotante (Toast) -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-gray-900 text-white px-4 py-3 rounded-ml shadow-lg flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-ml-blue"></i>
+        <span id="toast-message" class="text-sm font-medium">Notificación</span>
+    </div>
+
+    <!-- HEADER INSTITUCIONAL (#FFE600) -->
+    <header class="bg-ml-yellow border-b border-yellow-300 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo-1.png" alt="Mercado Libre" class="h-8 object-contain">
+                <span class="text-xs font-bold text-ml-textDark border-l border-black/20 pl-3">
+                    SGDP
+                </span>
+                <span class="text-xs text-ml-textMuted hidden sm:inline">
+                    Administración y Gobierno
+                </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-ml-textDark">
+                <div class="flex items-center gap-2 bg-white/60 border border-yellow-400 px-2.5 py-1 rounded-full">
+                    <i class="fa-solid fa-shield-halved text-ml-blue"></i>
+                    <span class="font-semibold">Administrador de Sistema · Auditor</span>
+                </div>
+                <div class="w-7 h-7 bg-gray-200 text-ml-textDark font-bold rounded-full flex items-center justify-center text-[10px] border border-gray-300">
+                    TI
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ENCABEZADO PRINCIPAL Y PESTAÑAS DE NAVEGACIÓN (SIN FILTROS GLOBALES RUIDOSOS) -->
+    <div class="bg-white border-b border-gray-200 shadow-sm sticky top-[53px] z-30">
+        <div class="max-w-7xl mx-auto px-4 pt-3.5 space-y-3">
+            
+            <div class="text-[11px] text-ml-textMuted flex items-center gap-1.5">
+                <span>Administración</span>
+                <span>/</span>
+                <span>Postventa</span>
+                <span>/</span>
+                <span class="text-ml-textDark font-semibold">Panel de Control</span>
+            </div>
+
+            <div>
+                <h1 class="text-xl font-bold text-ml-textDark tracking-tight">Panel de Analítica y Auditoría</h1>
+                <p class="text-xs text-ml-textMuted mt-0.5">Gestión integral de métricas de postventa, trazabilidad de eventos e itinerario de reglas.</p>
+            </div>
+
+            <!-- NAVEGACIÓN DE PESTAÑAS (TABS) -->
+            <div class="flex items-center gap-2 overflow-x-auto text-xs font-semibold pt-1 border-t">
+                <button id="tab-analytics" onclick="switchTab('analytics')" class="tab-btn font-bold px-4 py-3 border-b-2 border-ml-blue text-ml-blue flex items-center gap-2 whitespace-nowrap transition cursor-pointer">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analítica de Postventa</span>
+                </button>
+                <button id="tab-audit" onclick="switchTab('audit')" class="tab-btn font-semibold px-4 py-3 border-b-2 border-transparent text-ml-textMuted hover:text-ml-textDark flex items-center gap-2 whitespace-nowrap transition cursor-pointer">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Bitácora de Auditoría</span>
+                </button>
+                <button id="tab-rules" onclick="switchTab('rules')" class="tab-btn font-semibold px-4 py-3 border-b-2 border-transparent text-ml-textMuted hover:text-ml-textDark flex items-center gap-2 whitespace-nowrap transition cursor-pointer">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Reglas y Motivos</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 flex-1 w-full pb-10">
+
+        <!-- ==================== VISTA 1: ANALÍTICA DE POSTVENTA ==================== -->
+        <div id="view-analytics" class="space-y-6">
+
+            <!-- FILTROS EXCLUSIVOS DE LA VISTA DE ANALÍTICA -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-ml border border-gray-200 ml-card-shadow">
+                <div class="flex items-center gap-2 text-xs">
+                    <i class="fa-solid fa-filter text-ml-blue"></i>
+                    <span class="font-bold text-ml-textDark">Filtros de Análisis Métrico</span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 text-xs">
+                    <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-ml px-3 py-1.5">
+                        <i class="fa-regular fa-calendar text-gray-400"></i>
+                        <span class="text-[10px] text-ml-textMuted font-medium">Periodo:</span>
+                        <select id="filter-date" onchange="applyAnalyticsFilter()" class="bg-transparent font-semibold text-ml-textDark outline-none cursor-pointer">
+                            <option value="30">Últimos 30 días</option>
+                            <option value="60">Últimos 60 días</option>
+                            <option value="90">Últimos 90 días</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-ml px-3 py-1.5">
+                        <i class="fa-solid fa-layer-group text-gray-400"></i>
+                        <span class="text-[10px] text-ml-textMuted font-medium">Categoría:</span>
+                        <select id="filter-category" onchange="applyAnalyticsFilter()" class="bg-transparent font-semibold text-ml-textDark outline-none cursor-pointer">
+                            <option value="all">Todas las Categorías</option>
+                            <option value="tech">Tecnología y Electrónica</option>
+                            <option value="fashion">Moda y Calzado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETAS DE INDICADORES CLAVE (KPIs) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- KPI 1: Tasa de Autogestión -->
+                <div class="bg-ml-card rounded-ml p-4 ml-card-shadow border border-gray-200 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-medium text-ml-textMuted">Tasa de Autogestión</span>
+                        <i class="fa-solid fa-link text-ml-blue text-sm"></i>
+                    </div>
+                    <div class="my-2">
+                        <span class="text-3xl font-bold text-ml-textDark tracking-tight">78.4%</span>
+                    </div>
+                    <div class="text-[11px] text-ml-green font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                        <span>+2.3% vs mes anterior</span>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Tasa de Devolución Global -->
+                <div class="bg-ml-card rounded-ml p-4 ml-card-shadow border border-gray-200 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-medium text-ml-textMuted">Tasa de Devolución Global</span>
+                        <i class="fa-solid fa-arrow-rotate-left text-ml-blue text-sm"></i>
+                    </div>
+                    <div class="my-2">
+                        <span class="text-3xl font-bold text-ml-textDark tracking-tight">2.4%</span>
+                    </div>
+                    <div class="text-[11px] text-ml-green font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                        <span>-0.5% vs mes anterior</span>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Tiempo Medio de Resolución -->
+                <div class="bg-ml-card rounded-ml p-4 ml-card-shadow border border-gray-200 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-medium text-ml-textMuted">Tiempo Medio de Resolución</span>
+                        <i class="fa-regular fa-clock text-ml-blue text-sm"></i>
+                    </div>
+                    <div class="my-2 flex items-baseline gap-1.5">
+                        <span class="text-3xl font-bold text-ml-textDark tracking-tight">1.8</span>
+                        <span class="text-xs font-normal text-ml-textMuted">Días hábiles</span>
+                    </div>
+                    <div class="text-[11px] text-ml-textMuted">
+                        <span>Desde apertura hasta resolución</span>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Tasa de Escalados a Mediación -->
+                <div class="bg-ml-card rounded-ml p-4 ml-card-shadow border border-gray-200 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-medium text-ml-textMuted">Tasa de Escalados a Mediación</span>
+                        <i class="fa-solid fa-scale-balanced text-ml-blue text-sm"></i>
+                    </div>
+                    <div class="my-2">
+                        <span class="text-3xl font-bold text-ml-textDark tracking-tight">4.1%</span>
+                    </div>
+                    <div class="text-[11px] text-ml-green font-medium flex items-center gap-1">
+                        <i class="fa-regular fa-circle-check"></i>
+                        <span>Límite óptimo &lt; 5%</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- GRÁFICOS INFERIORES -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- GRÁFICO 1: MOTIVOS DE DEVOLUCIÓN -->
+                <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h3 class="font-bold text-sm text-ml-textDark flex items-center gap-2">
+                            <i class="fa-solid fa-chart-bar text-ml-blue"></i> Motivos de Devolución más Recurrentes
+                        </h3>
+                        <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono">Top 5 Causales</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div class="space-y-1">
+                            <div class="flex justify-between font-semibold">
+                                <span class="text-ml-textDark">Producto defectuoso o con fallas</span>
+                                <span class="text-ml-textMuted">42% (596 casos)</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-ml-blue h-2.5 rounded-full" style="width: 42%"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between font-semibold">
+                                <span class="text-ml-textDark">Arrepentimiento de compra</span>
+                                <span class="text-ml-textMuted">28% (397 casos)</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-ml-yellow h-2.5 rounded-full" style="width: 28%"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between font-semibold">
+                                <span class="text-ml-textDark">Talla o dimensión diferente a la descrita</span>
+                                <span class="text-ml-textMuted">16% (227 casos)</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-ml-purple h-2.5 rounded-full" style="width: 16%"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between font-semibold">
+                                <span class="text-ml-textDark">Empaque o producto dañado en el transporte</span>
+                                <span class="text-ml-textMuted">9% (128 casos)</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-ml-red h-2.5 rounded-full" style="width: 9%"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between font-semibold">
+                                <span class="text-ml-textDark">Producto incompleto o faltan accesorios</span>
+                                <span class="text-ml-textMuted">5% (72 casos)</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-gray-400 h-2.5 rounded-full" style="width: 5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICO 2: RESOLUCIÓN POR CANAL -->
+                <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 space-y-4">
+                    <div class="border-b pb-3">
+                        <h3 class="font-bold text-base text-ml-textDark">Resolución por Canal</h3>
+                        <p class="text-xs text-ml-textMuted">Distribución de las resoluciones de casos</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-around gap-6 pt-2">
+                        <!-- GRÁFICO DONA EN SVG -->
+                        <div class="relative w-44 h-44 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3483FA" stroke-width="4.5" stroke-dasharray="65 35" stroke-dashoffset="0"></circle>
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#00A650" stroke-width="4.5" stroke-dasharray="20 80" stroke-dashoffset="-65"></circle>
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#FFE600" stroke-width="4.5" stroke-dasharray="15 85" stroke-dashoffset="-85"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <span class="text-2xl font-black text-ml-textDark">100%</span>
+                                <span class="text-[10px] text-ml-textMuted font-medium">de resoluciones</span>
+                            </div>
+                        </div>
+
+                        <!-- LEYENDA INSTITUCIONAL -->
+                        <div class="space-y-4 text-xs w-full sm:w-auto">
+                            <div class="flex items-center justify-between gap-8 border-b pb-2">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-3.5 rounded bg-ml-blue inline-block"></span>
+                                    <span class="font-medium text-ml-textDark">Aprobado por Vendedor</span>
+                                </div>
+                                <span class="font-bold text-ml-textDark text-sm">65%</span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-8 border-b pb-2">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-3.5 rounded bg-ml-green inline-block"></span>
+                                    <span class="font-medium text-ml-textDark">Aprobación Automática (Compra Protegida)</span>
+                                </div>
+                                <span class="font-bold text-ml-textDark text-sm">20%</span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-8 border-b pb-2">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-3.5 rounded bg-ml-yellow inline-block"></span>
+                                    <span class="font-medium text-ml-textDark">Dictamen Mediación Mercado Libre</span>
+                                </div>
+                                <span class="font-bold text-ml-textDark text-sm">15%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ==================== VISTA 2: BITÁCORA DE AUDITORÍA ==================== -->
+        <div id="view-audit" class="space-y-4 hidden">
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h2 class="font-bold text-base text-ml-textDark">Bitácora de Auditoría</h2>
+                
+                <!-- BUSCADOR Y HERRAMIENTAS PROPIAS DE AUDITORÍA -->
+                <div class="flex items-center gap-2 text-xs">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400 absolute left-2.5 top-2.5"></i>
+                        <input type="text" id="audit-search" onkeyup="filterAuditTable()" placeholder="Buscar por IP, usuario o acción..." class="bg-white border border-gray-300 rounded-ml pl-8 pr-3 py-1.5 outline-none focus:border-ml-blue w-64">
+                    </div>
+                    <button onclick="showToast('Exportando reporte de auditoría en CSV...', 'success')" class="bg-white hover:bg-gray-50 border border-gray-300 text-ml-textDark font-semibold px-3 py-1.5 rounded-ml flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-download text-gray-500"></i> Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR DE LA TABLA DE LOGS -->
+            <div class="bg-white rounded-ml ml-card-shadow overflow-hidden border border-gray-200">
+                
+                <div class="p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-50 text-ml-blue rounded flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-ml-textDark">Registro inmutable de acciones</h3>
+                            <p class="text-xs text-ml-textMuted">Consulta de eventos · Sin edición ni eliminación de registros</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="bg-blue-50 text-ml-blue font-semibold px-2.5 py-1 rounded border border-blue-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-[10px]"></i> Solo lectura
+                        </span>
+                    </div>
+                </div>
+
+                <!-- TABLA DE LOGS FIEL AL ESTÁNDAR Y SIN LENGUAJE TÉCNICO DE BACKEND -->
+                <div class="overflow-x-auto">
+                    <table id="audit-table" class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-[#1A2332] text-white font-bold uppercase text-[10px] tracking-wider">
+                                <th class="p-3">Fecha y Hora</th>
+                                <th class="p-3">Usuario</th>
+                                <th class="p-3">Rol</th>
+                                <th class="p-3">Acción Realizada</th>
+                                <th class="p-3">Dirección IP</th>
+                                <th class="p-3 text-left">Estado Final</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 font-mono text-[11px]">
+                            
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 14:22:10</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-441</td>
+                                <td class="p-3 font-sans text-ml-textDark">Agente Soporte</td>
+                                <td class="p-3 font-sans text-ml-textDark">Procesar Reembolso en Mercado Pago</td>
+                                <td class="p-3 text-ml-textMuted">192.168.1.45</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 14:18:32</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-218</td>
+                                <td class="p-3 font-sans text-ml-textDark">Auditor</td>
+                                <td class="p-3 font-sans text-ml-textDark">Consultar Registro de Auditoría</td>
+                                <td class="p-3 text-ml-textMuted">192.0.2.18</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 14:12:05</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-107</td>
+                                <td class="p-3 font-sans text-ml-textDark">Administrador</td>
+                                <td class="p-3 font-sans text-ml-textDark">Actualizar permisos de acceso</td>
+                                <td class="p-3 text-ml-textMuted">192.0.2.24</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 13:58:41</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-902</td>
+                                <td class="p-3 font-sans text-ml-textDark">Operador de Mediación</td>
+                                <td class="p-3 font-sans text-ml-textDark">Revisar evidencia de reclamo</td>
+                                <td class="p-3 text-ml-textMuted">10.0.1.112</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 13:41:07</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-118</td>
+                                <td class="p-3 font-sans text-ml-textDark">Analista de Postventa</td>
+                                <td class="p-3 font-sans text-ml-textDark">Generar reporte de devoluciones</td>
+                                <td class="p-3 text-ml-textMuted">192.168.0.87</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 13:26:19</td>
+                                <td class="p-3 font-bold text-ml-textDark">SYS-ML-01</td>
+                                <td class="p-3 font-sans text-ml-textDark">Sistema Automático Mercado Libre</td>
+                                <td class="p-3 font-sans text-ml-textDark">Aprobar devolución en Compra Protegida</td>
+                                <td class="p-3 text-ml-textMuted">192.168.1.22</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-green font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Aprobado
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 13:04:55</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-331</td>
+                                <td class="p-3 font-sans text-ml-textDark">Auditor</td>
+                                <td class="p-3 font-sans text-ml-textDark">Exportar registros de auditoría</td>
+                                <td class="p-3 text-ml-textMuted">192.0.2.41</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 12:49:12</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-204</td>
+                                <td class="p-3 font-sans text-ml-textDark">Administrador</td>
+                                <td class="p-3 font-sans text-ml-textDark">Crear cuenta de acceso temporal</td>
+                                <td class="p-3 text-ml-textMuted">10.0.1.09</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 12:31:44</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-556</td>
+                                <td class="p-3 font-sans text-ml-textDark">Agente Soporte</td>
+                                <td class="p-3 font-sans text-ml-textDark">Revisar caso escalado a mediación</td>
+                                <td class="p-3 text-ml-textMuted">192.168.1.03</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-blue font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Exitoso
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="p-3 text-ml-textDark">2026-10-15 12:18:10</td>
+                                <td class="p-3 font-bold text-ml-textDark">USR-990</td>
+                                <td class="p-3 font-sans text-ml-textDark">Operador de Mediación</td>
+                                <td class="p-3 font-sans text-ml-textDark">Emitir dictamen de mediación</td>
+                                <td class="p-3 text-ml-textMuted">10.0.1.77</td>
+                                <td class="p-3 font-sans">
+                                    <span class="inline-flex items-center gap-1.5 text-ml-green font-semibold">
+                                        <i class="fa-regular fa-circle-check"></i> Aprobado
+                                    </span>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3.5 bg-gray-50 border-t flex items-center justify-between text-[11px] text-ml-textMuted">
+                    <span>Mostrando 10 registros auditados</span>
+                    <span>Vista de consulta para auditoría de procesos</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ==================== VISTA 3: REGLAS Y MOTIVOS ==================== -->
+        <div id="view-rules" class="space-y-6 hidden">
+
+            <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 space-y-5">
+                <div class="flex items-center justify-between border-b pb-3">
+                    <div>
+                        <h3 class="font-bold text-base text-ml-textDark">Gestión del Catálogo de Motivos de Devolución</h3>
+                        <p class="text-xs text-ml-textMuted">Habilita, deshabilita o configura las reglas de derivación manual para las opciones desplegables.</p>
+                    </div>
+                    <button onclick="showToast('Abriendo formulario para registrar nuevo motivo...', 'info')" class="bg-ml-blue hover:bg-ml-blueHover text-white font-bold px-3.5 py-2 rounded-ml text-xs shadow-sm flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus"></i> Nuevo Motivo
+                    </button>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                    
+                    <div class="p-3 border rounded-ml flex items-center justify-between bg-gray-50">
+                        <div class="space-y-0.5">
+                            <span class="font-bold text-ml-textDark block">Producto defectuoso o con fallas</span>
+                            <span class="text-ml-textMuted">Requiere carga obligatoria de evidencia multimedia (hasta 5 fotos / 1 video).</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full font-bold text-[10px]">Activo</span>
+                            <button onclick="showToast('Editando parámetros del motivo...', 'info')" class="text-ml-blue font-semibold hover:underline cursor-pointer">Editar</button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border rounded-ml flex items-center justify-between bg-gray-50">
+                        <div class="space-y-0.5">
+                            <span class="font-bold text-ml-textDark block">Arrepentimiento de compra</span>
+                            <span class="text-ml-textMuted">Aplica dentro de los 10 días de recibido. Requiere empaque original sin uso.</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full font-bold text-[10px]">Activo</span>
+                            <button onclick="showToast('Editando parámetros del motivo...', 'info')" class="text-ml-blue font-semibold hover:underline cursor-pointer">Editar</button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border rounded-ml flex items-center justify-between bg-amber-50/50 border-amber-200">
+                        <div class="space-y-0.5">
+                            <span class="font-bold text-ml-textDark block">Categorías Restringidas (Higiene / Perecibles)</span>
+                            <span class="text-amber-800">Derivación automática a revisión manual por política especial de seguridad.</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full font-bold text-[10px]">Revisión Manual</span>
+                            <button onclick="showToast('Editando parámetros de restricción...', 'info')" class="text-ml-blue font-semibold hover:underline cursor-pointer">Editar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- LÓGICA JAVASCRIPT DE NAVEGACIÓN Y FILTRADO INTERNO -->
+    <script>
+        function switchTab(tab) {
+            document.getElementById('view-analytics').classList.add('hidden');
+            document.getElementById('view-audit').classList.add('hidden');
+            document.getElementById('view-rules').classList.add('hidden');
+
+            const tabs = ['analytics', 'audit', 'rules'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                if (btn) {
+                    btn.className = "tab-btn font-semibold px-4 py-3 border-b-2 border-transparent text-ml-textMuted hover:text-ml-textDark flex items-center gap-2 whitespace-nowrap transition cursor-pointer";
+                }
+            });
+
+            const activeView = document.getElementById('view-' + tab);
+            const activeBtn = document.getElementById('tab-' + tab);
+
+            if (activeView) activeView.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.className = "tab-btn font-bold px-4 py-3 border-b-2 border-ml-blue text-ml-blue flex items-center gap-2 whitespace-nowrap transition cursor-pointer";
+            }
+        }
+
+        function applyAnalyticsFilter() {
+            const dateVal = document.getElementById('filter-date').value;
+            const catVal = document.getElementById('filter-category').value;
+            showToast(`Filtros de analítica aplicados: ${dateVal} días | Categoría: ${catVal}`, "info");
+        }
+
+        function filterAuditTable() {
+            const input = document.getElementById('audit-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#audit-table tbody tr');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+
+            if (type === 'warning') {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            } else if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-ml-green";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-ml-blue";
+            }
+
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

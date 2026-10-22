@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte Interno - Mercado Libre Chile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ml: {
+                            yellow: '#FFE600',
+                            blue: '#3483FA',
+                            blueHover: '#2968C8',
+                            green: '#00A650',
+                            red: '#D93535',
+                            bg: '#F5F5F5',
+                            card: '#FFFFFF',
+                            textDark: '#333333',
+                            textMuted: '#666666'
+                        }
+                    },
+                    borderRadius: { 'ml': '8px' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-ml-bg text-ml-textDark font-['Inter'] min-h-screen flex flex-col">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-gray-900 text-white px-4 py-3 rounded-ml shadow-lg flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-ml-blue"></i>
+        <span id="toast-message" class="text-sm font-medium">Notificación</span>
+    </div>
+
+    <!-- HEADER SOPORTE INTERNO ML -->
+    <header class="bg-gray-900 text-white border-b border-gray-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="https://es.logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo1.png" alt="ML" class="h-7 object-contain brightness-200">
+                <span class="text-xs bg-blue-600/30 text-blue-400 font-bold px-2.5 py-1 rounded border border-blue-500/30 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved"></i> Portal Interno de Soporte y Arbitraje
+                </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-gray-300">
+                <span class="font-medium"><i class="fa-solid fa-user-check text-ml-green mr-1"></i> Camila Rojas (Agente Senior ML Chile)</span>
+                <span class="bg-gray-800 px-2 py-1 rounded text-[11px] font-mono border border-gray-700">ROL: MEDIACION_L2</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN SECUNDARIA / FICHA DE CASO -->
+    <div class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-3">
+                <a href="#" class="text-ml-blue hover:underline font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Bandeja de Disputas
+                </a>
+                <span class="text-gray-300">|</span>
+                <span class="font-bold text-base text-ml-textDark">Caso #MED-2026-7731</span>
+                <span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full text-[10px]">En Mediación Activa</span>
+            </div>
+            <!-- RELOJ SLA DE 48 HORAS HÁBILES (MED-01) -->
+            <div class="bg-amber-50 border border-amber-200 text-amber-900 px-3 py-1.5 rounded-ml flex items-center gap-2 font-mono font-bold">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600 text-sm animate-pulse"></i>
+                <span>SLA Restante: <strong class="text-amber-700">32h 15m</strong> (de 48h hábiles)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL: CONSOLA UNIFICADA 360° -->
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 flex-1 w-full">
+
+        <!-- RESUMEN DE LA TRANSACCIÓN -->
+        <div class="bg-white rounded-ml p-4 shadow-sm border border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+            <div>
+                <span class="text-ml-textMuted block font-semibold uppercase text-[10px]">Producto en Disputa</span>
+                <span class="font-bold text-sm text-ml-textDark block mt-0.5">Mouse Ergonómico Wireless</span>
+                <span class="text-ml-textMuted">1 Unidad · Comprado el 12 Oct 2026</span>
+            </div>
+            <div>
+                <span class="text-ml-textMuted block font-semibold uppercase text-[10px]">Orden de Venta</span>
+                <span class="font-mono font-bold text-ml-textDark block mt-0.5">#200001497731</span>
+                <a href="#" class="text-ml-blue hover:underline text-[11px]">Ver detalle de transacción <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i></a>
+            </div>
+            <div>
+                <span class="text-ml-textMuted block font-semibold uppercase text-[10px]">Monto Retenido en Custodia</span>
+                <span class="font-bold text-base text-ml-blue block mt-0.5">$24.990 CLP</span>
+                <span class="text-ml-textMuted">Fondos pausados en Mercado Pago</span>
+            </div>
+            <div>
+                <span class="text-ml-textMuted block font-semibold uppercase text-[10px]">Origen de la Disputa</span>
+                <span class="font-bold text-ml-red block mt-0.5"><i class="fa-solid fa-xmark-circle"></i> Rechazo del Vendedor</span>
+                <span class="text-ml-textMuted">Comprador solicitó intervención (AUT-04)</span>
+            </div>
+        </div>
+
+        <!-- CONTRASTE 360°: COMPRADOR VS VENDEDOR (MED-02) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- COLUMNA COMPRADOR -->
+            <div class="bg-white rounded-ml p-5 shadow-sm border border-gray-200 space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 bg-blue-100 text-ml-blue rounded-full flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-ml-textDark">Comprador: Juan Pérez</h3>
+                            <span class="text-[10px] text-ml-green font-semibold"><i class="fa-solid fa-circle-check"></i> Identidad Verificada</span>
+                        </div>
+                    </div>
+                    <span class="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded font-mono">ID: USR-88392</span>
+                </div>
+
+                <div class="space-y-1.5 text-xs">
+                    <span class="font-bold text-ml-textMuted block uppercase text-[10px]">Motivo Declarado:</span>
+                    <span class="bg-red-50 text-ml-red font-bold px-2 py-1 rounded inline-block">Producto defectuoso o dañado</span>
+                </div>
+
+                <div class="bg-gray-50 border rounded-ml p-3 text-xs space-y-1">
+                    <span class="font-semibold text-ml-textMuted block text-[10px] uppercase">Declaración del Comprador:</span>
+                    <p class="text-ml-textDark leading-relaxed italic">"El producto presenta fallas de funcionamiento desde el primer uso. Adjunto tres fotografías y un video de 30 segundos para documentar el problema. Solicito la devolución y el reembolso."</p>
+                    <span class="text-[10px] text-ml-textMuted block pt-1 text-right">Iniciado: 14 Oct, 10:30 hrs</span>
+                </div>
+
+                <!-- GALERÍA MULTIMEDIA DE EVIDENCIAS -->
+                <div class="space-y-2 text-xs">
+                    <span class="font-bold text-ml-textDark block uppercase text-[10px]">Evidencia Multimedia Adjunta (4 archivos):</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="border rounded bg-black text-white p-2 flex flex-col items-center justify-center text-center cursor-pointer hover:opacity-90 relative group h-20">
+                            <i class="fa-solid fa-circle-play text-ml-yellow text-2xl"></i>
+                            <span class="text-[9px] mt-1 font-mono">video_defecto.mp4</span>
+                            <span class="absolute top-1 right-1 bg-black/70 text-[8px] px-1 rounded">0:30</span>
+                        </div>
+                        <div class="border rounded bg-gray-100 p-1 flex flex-col items-center justify-center text-center cursor-pointer hover:border-ml-blue h-20">
+                            <i class="fa-solid fa-image text-gray-400 text-xl"></i>
+                            <span class="text-[9px] text-gray-600 mt-1">foto_1.jpg</span>
+                        </div>
+                        <div class="border rounded bg-gray-100 p-1 flex flex-col items-center justify-center text-center cursor-pointer hover:border-ml-blue h-20">
+                            <i class="fa-solid fa-image text-gray-400 text-xl"></i>
+                            <span class="text-[9px] text-gray-600 mt-1">foto_2.jpg</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA VENDEDOR -->
+            <div class="bg-white rounded-ml p-5 shadow-sm border border-gray-200 space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-ml-textDark">Vendedor: TechStore Chile</h3>
+                            <span class="text-[10px] text-ml-blue font-semibold"><i class="fa-solid fa-award"></i> MercadoLíder Platinum</span>
+                        </div>
+                    </div>
+                    <span class="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded font-mono">ID: SEL-10294</span>
+                </div>
+
+                <div class="space-y-1.5 text-xs">
+                    <span class="font-bold text-ml-textMuted block uppercase text-[10px]">Acción Ejecutada:</span>
+                    <span class="bg-amber-100 text-amber-900 font-bold px-2 py-1 rounded inline-block">Rechazó Devolución (CU-VEN-02)</span>
+                </div>
+
+                <div class="bg-gray-50 border rounded-ml p-3 text-xs space-y-1">
+                    <span class="font-semibold text-ml-textMuted block text-[10px] uppercase">Justificación del Vendedor:</span>
+                    <p class="text-ml-textDark leading-relaxed italic">"El producto despachado fue inspeccionado y embalado en condiciones óptimas. El número de serie registrado en la factura coincide con el stock. No se registraron defectos previos al envío."</p>
+                    <span class="text-[10px] text-ml-textMuted block pt-1 text-right">Respondido: 15 Oct, 09:15 hrs</span>
+                </div>
+
+                <!-- DOCUMENTACIÓN APORTADA POR VENDEDOR -->
+                <div class="space-y-2 text-xs">
+                    <span class="font-bold text-ml-textDark block uppercase text-[10px]">Documentación de Despacho Aportada:</span>
+                    <div class="p-2.5 border rounded-ml bg-blue-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                            <div>
+                                <span class="font-bold block text-ml-textDark">Factura_despacho_7731.pdf</span>
+                                <span class="text-[10px] text-ml-textMuted">Serie declarada: TS-261012-8847</span>
+                            </div>
+                        </div>
+                        <button onclick="showToast('Abriendo documento PDF...', 'info')" class="text-ml-blue hover:underline font-bold text-xs">
+                            Ver PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- NOTAS INTERNAS PRIVADAS DE SOPORTE (MED-02) -->
+        <div class="bg-white rounded-ml p-4 shadow-sm border border-yellow-300 space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+                <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+                    <i class="fa-solid fa-lock text-amber-600"></i>
+                    <span>Notas Internas Privadas de Soporte</span>
+                    <span class="bg-yellow-100 text-yellow-800 text-[9px] px-2 py-0.5 rounded font-normal">Exclusivo Agentes ML (Oculto a Comprador/Vendedor)</span>
+                </div>
+            </div>
+
+            <div class="bg-amber-50/60 border border-amber-200 rounded p-2.5 text-xs text-amber-950 space-y-1">
+                <div class="flex justify-between text-[10px] font-bold text-amber-800">
+                    <span>Agente: Camila Rojas</span>
+                    <span>16 Oct, 13:48 hrs</span>
+                </div>
+                <p>Revisadas las 3 fotografías, el video de 30 segundos y la documentación de despacho. La falla encuadra dentro de la cobertura de Compra Protegida. Al no haber sido enviado a bodega aún por rechazo inicial del vendedor, corresponde emitir dictamen para liberar etiqueta prepagada o autorizar reembolso directo.</p>
+            </div>
+
+            <div class="flex gap-2 text-xs">
+                <input type="text" id="internal-note-input" placeholder="Añadir una nota interna confidencial..." class="flex-1 border rounded-ml px-3 py-1.5 outline-none focus:border-ml-blue bg-gray-50">
+                <button onclick="addInternalNote()" class="bg-gray-800 text-white font-semibold px-3 py-1.5 rounded-ml hover:bg-gray-900">
+                    Guardar Nota
+                </button>
+            </div>
+        </div>
+
+        <!-- CONSOLA DE DICTAMEN VINCULANTE (MED-03 / SYS-01) -->
+        <div class="bg-white rounded-ml p-5 shadow-sm border-2 border-ml-blue space-y-4">
+            <div class="flex items-center justify-between border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-100 text-ml-blue rounded-full flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-gavel"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-ml-textDark">Decisión y Dictamen Vinculante (`MED-03`)</h3>
+                        <p class="text-xs text-ml-textMuted">La resolución emitida es inapelable y autoriza la ejecución del reembolso en Mercado Pago API (`CU-SYS-01`).</p>
+                    </div>
+                </div>
+                <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded">Borrador no notificado</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                
+                <!-- OPCIONES DE FALLO -->
+                <div class="space-y-3">
+                    <label class="block font-bold text-ml-textDark uppercase text-[10px]">Selecciona el Sentido del Fallo (* Obligatorio):</label>
+                    
+                    <label class="flex items-start gap-3 p-3 border rounded-ml hover:border-ml-blue cursor-pointer bg-blue-50/30">
+                        <input type="radio" name="dictamen-option" value="buyer" checked class="mt-0.5 text-ml-blue focus:ring-ml-blue">
+                        <div>
+                            <span class="block font-bold text-ml-textDark">1. Fallar a Favor del Comprador</span>
+                            <span class="block text-[11px] text-ml-textMuted">Aprueba la devolución, autoriza la emisión de etiqueta prepagada y retiene fondos hasta recepción física.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 border rounded-ml hover:border-ml-blue cursor-pointer bg-white">
+                        <input type="radio" name="dictamen-option" value="seller" class="mt-0.5 text-ml-blue focus:ring-ml-blue">
+                        <div>
+                            <span class="block font-bold text-ml-textDark">2. Fallar a Favor del Vendedor</span>
+                            <span class="block text-[11px] text-ml-textMuted">Cierra el reclamo, libera los $24.990 CLP retenidos a la cuenta del vendedor y desestima la devolución.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 border rounded-ml hover:border-ml-blue cursor-pointer bg-white">
+                        <input type="radio" name="dictamen-option" value="ml_covered" class="mt-0.5 text-ml-blue focus:ring-ml-blue">
+                        <div>
+                            <span class="block font-bold text-ml-textDark">3. Reembolso con Cargo a Mercado Libre</span>
+                            <span class="block text-[11px] text-ml-textMuted">Cubre el costo comercialmente sin afectar el dinero ni la reputación del vendedor.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- FUNDAMENTACIÓN Y GATILLO -->
+                <div class="space-y-3 flex flex-col justify-between">
+                    <div>
+                        <label class="block font-bold text-ml-textDark uppercase text-[10px] mb-1">Fundamento del Dictamen Vinculante (* Obligatorio):</label>
+                        <textarea id="dictamen-reason" rows="4" placeholder="Redacta los argumentos técnicos y la evaluación de evidencias que justifican el fallo. Este texto se incluirá en la notificación oficial a ambas partes..." class="w-full border rounded-ml p-2.5 text-xs outline-none focus:ring-2 focus:ring-ml-blue bg-gray-50 text-ml-textDark">Tras la revisión de las evidencias multimedia aportadas por el comprador donde se constata la falla de encendido y la boleta proporcionada por el vendedor, se determina dar curso a la garantía de Compra Protegida.</textarea>
+                    </div>
+
+                    <div class="flex gap-2 pt-2 border-t">
+                        <button onclick="emitirDictamenFinal()" class="flex-1 bg-ml-blue hover:bg-ml-blueHover text-white font-bold py-2.5 px-4 rounded-ml text-xs transition shadow flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Emitir Dictamen y Autorizar Token en Mercado Pago API</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function emitirDictamenFinal() {
+            const reason = document.getElementById('dictamen-reason').value.trim();
+            if (!reason) {
+                showToast("Debes ingresar el fundamento del dictamen antes de emitir", "warning");
+                return;
+            }
+
+            const option = document.querySelector('input[name="dictamen-option"]:checked').value;
+            let msg = "";
+
+            if (option === 'buyer') {
+                msg = "Dictamen emitido A FAVOR DEL COMPRADOR. Token de reembolso enviado a Mercado Pago API (CU-SYS-01).";
+            } else if (option === 'seller') {
+                msg = "Dictamen emitido A FAVOR DEL VENDEDOR. Fondos liberados al comercio.";
+            } else {
+                msg = "Dictamen emitido con CARGO A MERCADO LIBRE. Reembolso procesado.";
+            }
+
+            showToast(msg, "success");
+        }
+
+        function addInternalNote() {
+            const input = document.getElementById('internal-note-input');
+            if (input.value.trim()) {
+                showToast("Nota interna confidencial guardada en el expediente", "success");
+                input.value = "";
+            }
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+
+            if (type === 'warning') {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            } else if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-ml-green";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-ml-blue";
+            }
+
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>

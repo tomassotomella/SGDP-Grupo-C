@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercado Libre - Devolución o Cambio (SGDP)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ml: {
+                            yellow: '#FFE600',
+                            blue: '#3483FA',
+                            blueHover: '#2968C8',
+                            green: '#00A650',
+                            purple: '#652D90',
+                            bg: '#F5F5F5',
+                            card: '#FFFFFF',
+                            textDark: '#333333',
+                            textMuted: '#666666'
+                        }
+                    },
+                    borderRadius: {
+                        'ml': '8px'
+                    },
+                    boxShadow: {
+                        'ml-soft': '0px 2px 8px rgba(0, 0, 0, 0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F5F5F5;
+            color: #333333;
+        }
+        .ml-card-shadow {
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+        }
+        .stepper-line {
+            height: 2px;
+            background-color: #E5E7EB;
+            position: absolute;
+            top: 18px;
+            left: 10%;
+            right: 10%;
+            z-index: 0;
+        }
+        .stepper-progress {
+            height: 2px;
+            background-color: #3483FA;
+            position: absolute;
+            top: 18px;
+            left: 10%;
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 relative bg-ml-bg text-ml-textDark">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-gray-900 text-white px-4 py-3 rounded-ml shadow-lg flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-ml-blue"></i>
+        <span id="toast-message" class="text-sm font-medium">Notificación</span>
+    </div>
+
+    <!-- MODAL AUT-04: ESCALAMIENTO A MODERACIÓN / SOPORTE -->
+    <div id="modal-mediation" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-ml-card rounded-ml max-w-md w-full p-6 ml-card-shadow space-y-4">
+            <div class="flex items-center gap-3 border-b pb-3 text-purple-900">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-ml-purple font-bold">
+                    <i class="fa-solid fa-scale-balanced text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base text-ml-textDark">Pedir Intervención de Soporte</h3>
+                    <p class="text-xs text-ml-textMuted">Escalamiento a Moderación Mercado Libre</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-ml-textMuted leading-relaxed">
+                Un mediador especializado de Mercado Libre revisará la evidencia adjuntada, el historial del pedido y las políticas vigentes para emitir una resolución en menos de 24 horas.
+            </p>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-ml-textDark">Selecciona el motivo de escalamiento:</label>
+                <select id="mediation-reason" class="w-full border border-gray-300 rounded-ml p-2 text-xs bg-gray-50 outline-none focus:ring-2 focus:ring-ml-purple text-ml-textDark">
+                    <option value="timeout">El vendedor no respondió dentro del plazo de 48h</option>
+                    <option value="disagreement">No estoy de acuerdo con la propuesta del vendedor</option>
+                    <option value="urgent">Requiero asistencia prioritaria de Mercado Libre</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="confirmMediation()" class="flex-1 bg-ml-purple hover:bg-purple-800 text-white font-bold py-2.5 px-4 rounded-ml text-xs transition shadow">
+                    Confirmar y Escalar Caso
+                </button>
+                <button onclick="closeModal('modal-mediation')" class="bg-gray-100 hover:bg-gray-200 text-ml-textDark font-semibold py-2.5 px-4 rounded-ml text-xs transition">
+                    Volver
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AUT-05: CANCELAR SOLICITUD DE DEVOLUCIÓN -->
+    <div id="modal-cancel-request" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-ml-card rounded-ml max-w-md w-full p-6 ml-card-shadow space-y-4">
+            <div class="flex items-center gap-3 border-b pb-3 text-red-600">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base text-ml-textDark">¿Cancelar solicitud de devolución?</h3>
+                    <p class="text-xs text-ml-textMuted">El caso se cerrará definitivamente</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-ml-textMuted leading-relaxed">
+                Al cancelar, confirmas que conservas el producto o que resolviste el inconveniente. Tu pedido volverá al estado <strong class="text-ml-textDark">Entregado</strong> y se notificará al vendedor.
+            </p>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="confirmCancelRequest()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-ml text-xs transition shadow">
+                    Sí, Cancelar Solicitud
+                </button>
+                <button onclick="closeModal('modal-cancel-request')" class="bg-gray-100 hover:bg-gray-200 text-ml-textDark font-semibold py-2.5 px-4 rounded-ml text-xs transition">
+                    Mantener Solicitud
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER DE MERCADO LIBRE (PRIMARY COLOR: #FFE600) -->
+    <header class="bg-ml-yellow border-b border-yellow-300 py-3 px-4 sticky top-0 z-40">
+        <div class="max-w-3xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('p0')">
+                <img src="https://es.logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo1.png" alt="Mercado Libre" class="h-8 object-contain">
+                <span class="hidden sm:inline-block text-xs font-semibold text-ml-textDark border-l border-gray-500/40 pl-3">
+                    Centro de Soluciones y Devoluciones
+                </span>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-ml-textDark bg-yellow-300/60 px-3 py-1.5 rounded-full">
+                <i class="fa-solid fa-shield-halved text-ml-green"></i>
+                <span>Compra Protegida</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-3 sm:px-4 pt-4">
+
+        <!-- ================================================================= -->
+        <!-- PANTALLA 0: "MIS COMPRAS" (PUNTO DE INICIO AUT-01) -->
+        <!-- ================================================================= -->
+        <section id="screen-p0" class="space-y-4">
+            <div class="bg-ml-card rounded-ml p-4 ml-card-shadow">
+                <div class="flex items-center justify-between mb-3">
+                    <h1 class="text-xl font-bold text-ml-textDark">Mis compras</h1>
+                </div>
+                
+                <div class="flex border-b border-gray-200 text-sm font-medium overflow-x-auto no-scrollbar">
+                    <button class="py-2 px-3 text-ml-textMuted hover:text-ml-textDark whitespace-nowrap">Todas</button>
+                    <button class="py-2 px-3 text-ml-textMuted hover:text-ml-textDark whitespace-nowrap">En camino</button>
+                    <button class="py-2 px-3 text-ml-blue border-b-2 border-ml-blue font-semibold whitespace-nowrap">Entregadas</button>
+                    <button class="py-2 px-3 text-ml-textMuted hover:text-ml-textDark whitespace-nowrap">Canceladas</button>
+                </div>
+            </div>
+
+            <!-- TARJETA 1: PRODUCTO ELEGIBLE (AUDÍFONOS) -->
+            <div class="bg-ml-card rounded-ml p-4 ml-card-shadow space-y-3 border border-gray-100 relative overflow-hidden">
+                <div class="flex items-center justify-between text-xs text-ml-textMuted border-b pb-2">
+                    <span class="text-ml-green font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Entregado el 15 de octubre
+                    </span>
+                    <span>Orden #774920</span>
+                </div>
+
+                <div class="flex gap-3 items-start pt-1">
+                    <div class="w-20 h-20 bg-gray-50 rounded-ml flex items-center justify-center flex-shrink-0 p-1 border overflow-hidden">
+                        <img src="https://jumbocl.vtexassets.com/arquivos/ids/672525-900-900?width=900&height=900&aspect=true" alt="Audífonos Bluetooth" class="w-full h-full object-contain">
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-bold text-ml-textDark text-sm sm:text-base truncate">Audífonos Bluetooth Wireless</h2>
+                        <p class="text-xs text-ml-textMuted">Tienda Oficial AudioChile</p>
+                        <p class="text-xs text-ml-textMuted mt-0.5">1 unidad · <span class="font-semibold text-ml-textDark">$39.990</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-100 rounded-ml p-2.5 flex items-center gap-2 text-xs text-blue-800">
+                    <i class="fa-solid fa-shield-cat text-ml-blue text-sm"></i>
+                    <span>Devolución gratis disponible (30 días de cobertura)</span>
+                </div>
+
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                    <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-ml-textDark text-xs font-semibold py-2 px-3 rounded-ml text-center transition">
+                        Volver a comprar
+                    </button>
+                    <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-ml-textDark text-xs font-semibold py-2 px-3 rounded-ml text-center transition">
+                        Ver detalle
+                    </button>
+                    <button onclick="navigateTo('p1')" class="w-full sm:w-auto bg-ml-blue hover:bg-ml-blueHover text-white text-xs font-semibold py-2.5 px-4 rounded-ml text-center transition shadow-sm flex items-center justify-center gap-1.5">
+                        <span>Solicitar Devolución o Cambio</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TARJETA 2: PRODUCTO RESTRINGIDO -->
+            <div class="bg-ml-card rounded-ml p-4 ml-card-shadow space-y-3 border border-gray-200 opacity-90">
+                <div class="flex items-center justify-between text-xs text-ml-textMuted border-b pb-2">
+                    <span class="text-ml-green font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Entregado el 2 de octubre
+                    </span>
+                    <span>Orden #771022</span>
+                </div>
+
+                <div class="flex gap-3 items-start pt-1">
+                    <div class="w-20 h-20 bg-pink-50 rounded-ml flex items-center justify-center flex-shrink-0 p-1 border border-pink-100">
+                        <i class="fa-solid fa-spray-can text-3xl text-pink-400"></i>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-bold text-ml-textDark text-sm truncate">Perfume Eau de Parfum 100ml</h2>
+                        <p class="text-xs text-ml-textMuted">BeautyStore Chile</p>
+                        <p class="text-xs text-ml-textMuted mt-0.5">1 unidad · $29.990</p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-ml p-2.5 flex items-start gap-2 text-xs text-amber-900">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5 text-sm"></i>
+                    <div>
+                        <span class="font-semibold">Categoría Restringida:</span>
+                        <p class="text-[11px] text-amber-800">No admite devolución directa por políticas sanitarias e higiene.</p>
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <button onclick="showToast('Esta categoría requiere revisión especial de soporte', 'warning')" 
+                            class="w-full bg-gray-100 text-gray-400 text-xs font-semibold py-2 px-3 rounded-ml text-center cursor-not-allowed">
+                        Solicitar Devolución no disponible
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTENEDOR DE PASOS DE DEVOLUCIÓN -->
+        <div id="flow-container" class="hidden space-y-4">
+
+            <!-- STEPPER HORIZONTAL INTERACTIVO -->
+            <div class="bg-ml-card rounded-ml p-4 ml-card-shadow">
+                <div class="flex items-center justify-between mb-4 border-b pb-2">
+                    <div class="flex items-center gap-2">
+                        <button onclick="navigateTo('p0')" class="text-ml-textMuted hover:text-ml-textDark transition">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <h1 class="font-bold text-ml-textDark text-base sm:text-lg">Solicitar Devolución o Cambio</h1>
+                    </div>
+                    <span id="step-indicator-text" class="text-xs font-semibold text-ml-blue bg-blue-50 px-2.5 py-1 rounded-full">Paso 1 de 6</span>
+                </div>
+
+                <div class="relative py-2">
+                    <div class="stepper-line"></div>
+                    <div id="stepper-progress" class="stepper-progress"></div>
+
+                    <div class="relative z-10 flex justify-between text-center">
+                        <div class="flex flex-col items-center cursor-pointer" onclick="navigateTo('p1')">
+                            <div id="step-btn-1" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-ml-blue text-white shadow-md transition-all">1</div>
+                            <span class="text-[10px] mt-1 font-medium text-ml-textDark hidden sm:block">Creación</span>
+                        </div>
+                        <div class="flex flex-col items-center cursor-pointer" onclick="navigateTo('p2')">
+                            <div id="step-btn-2" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-ml-textMuted transition-all">2</div>
+                            <span class="text-[10px] mt-1 font-medium text-ml-textMuted hidden sm:block">Respuesta</span>
+                        </div>
+                        <div class="flex flex-col items-center cursor-pointer" onclick="navigateTo('p3')">
+                            <div id="step-btn-3" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-ml-textMuted transition-all">3</div>
+                            <span class="text-[10px] mt-1 font-medium text-ml-textMuted hidden sm:block">Etiqueta</span>
+                        </div>
+                        <div class="flex flex-col items-center cursor-pointer" onclick="navigateTo('p4')">
+                            <div id="step-btn-4" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-ml-textMuted transition-all">4</div>
+                            <span class="text-[10px] mt-1 font-medium text-ml-textMuted hidden sm:block">Transporte</span>
+                        </div>
+                        <div class="flex flex-col items-center cursor-pointer" onclick="navigateTo('p5')">
+                            <div id="step-btn-5" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-ml-textMuted transition-all">5</div>
+                            <span class="text-[10px] mt-1 font-medium text-ml-textMuted hidden sm:block">Bodega</span>
+                        </div>
+                        <div class="flex flex-col items-center cursor-pointer" onclick="navigateTo('p6')">
+                            <div id="step-btn-6" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-ml-textMuted transition-all">6</div>
+                            <span class="text-[10px] mt-1 font-medium text-ml-textMuted hidden sm:block">Reembolso</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETA DEL PRODUCTO SELECCIONADO -->
+            <div class="bg-ml-card rounded-ml p-3.5 ml-card-shadow flex items-center gap-3">
+                <div class="w-14 h-14 bg-gray-50 rounded-ml flex items-center justify-center flex-shrink-0 border overflow-hidden p-0.5">
+                    <img src="https://jumbocl.vtexassets.com/arquivos/ids/672525-900-900?width=900&height=900&aspect=true" alt="Audífonos Bluetooth" class="w-full h-full object-contain">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h2 class="font-bold text-ml-textDark text-sm truncate">Audífonos Bluetooth Wireless</h2>
+                    <p class="text-xs text-ml-textMuted">Orden #774920 · Tienda Oficial AudioChile</p>
+                </div>
+            </div>
+
+            <!-- PASO 1: FORMULARIO (AUT-02 & AUT-03) -->
+            <section id="screen-p1" class="space-y-4">
+                <div class="bg-ml-card rounded-ml p-4 sm:p-5 ml-card-shadow space-y-5">
+                    <div>
+                        <h2 class="font-bold text-ml-textDark text-base">Cuéntanos qué pasó</h2>
+                        <p class="text-xs text-ml-textMuted">Te ayudaremos a encontrar la mejor solución.</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-ml-textDark">Selecciona el motivo de la devolución <span class="text-red-500">*</span></label>
+                        <select id="reason-select" class="w-full border border-gray-300 rounded-ml p-2.5 text-sm focus:ring-2 focus:ring-ml-blue focus:border-ml-blue outline-none transition bg-gray-50 text-ml-textDark">
+                            <option value="defective" selected>El producto llegó defectuoso o no funciona</option>
+                            <option value="wrong">Es diferente a lo que pedí</option>
+                            <option value="regret">Me arrepentí de la compra</option>
+                            <option value="incomplete">Incompleto / Falta alguna parte</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-ml-textDark">Especifica la falla detectada</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="selectChip(this)" class="chip-btn px-3 py-1.5 rounded-full border border-ml-blue bg-blue-50 text-ml-blue text-xs font-semibold flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-check text-[10px]"></i> No enciende
+                            </button>
+                            <button type="button" onclick="selectChip(this)" class="chip-btn px-3 py-1.5 rounded-full border border-gray-300 bg-white text-ml-textDark hover:border-gray-400 text-xs font-semibold flex items-center gap-1.5 transition">
+                                Falta un accesorio
+                            </button>
+                            <button type="button" onclick="selectChip(this)" class="chip-btn px-3 py-1.5 rounded-full border border-gray-300 bg-white text-ml-textDark hover:border-gray-400 text-xs font-semibold flex items-center gap-1.5 transition">
+                                Caja dañada
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 border-t pt-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-ml-textDark text-xs">Agrega evidencia</h3>
+                                <p class="text-[11px] text-ml-textMuted">Adjunta fotos o video mostrando el detalle</p>
+                            </div>
+                            <span id="file-count-badge" class="text-xs bg-gray-100 text-ml-textDark px-2 py-0.5 rounded-ml font-medium">3/6 archivos</span>
+                        </div>
+
+                        <p class="text-[11px] text-ml-textMuted">Máximo 5 fotos (hasta 10MB) y 1 video corto (máx 30s)</p>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                            <label id="upload-btn" class="border-2 border-dashed border-ml-blue bg-blue-50/50 hover:bg-blue-50 rounded-ml p-3 flex flex-col items-center justify-center text-center cursor-pointer transition h-24">
+                                <i class="fa-solid fa-cloud-arrow-up text-ml-blue text-lg mb-1"></i>
+                                <span class="text-xs font-semibold text-ml-blue">Subir archivo</span>
+                                <span class="text-[9px] text-ml-textMuted">Foto o Video</span>
+                                <input type="file" id="file-input" onchange="handleFileUpload(event)" accept="image/*,video/*" class="hidden">
+                            </label>
+
+                            <div class="file-card relative group rounded-ml overflow-hidden border bg-gray-100 h-24" data-type="image">
+                                <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                                <button onclick="removeFile(this)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <span class="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80%]">audifonos_01.jpg</span>
+                            </div>
+
+                            <div class="file-card relative group rounded-ml overflow-hidden border bg-gray-100 h-24" data-type="image">
+                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                                <button onclick="removeFile(this)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <span class="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80%]">audifonos_02.jpg</span>
+                            </div>
+
+                            <div class="file-card relative group rounded-ml overflow-hidden border bg-gray-900 h-24 flex items-center justify-center" data-type="video">
+                                <i class="fa-solid fa-circle-play text-white/80 text-2xl"></i>
+                                <span class="absolute top-1 left-1 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded">00:28s</span>
+                                <button onclick="removeFile(this)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <span class="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80%]">video_evidencia.mp4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 border-t pt-4">
+                        <label class="block text-xs font-semibold text-ml-textDark">Observaciones complementarias <span class="text-ml-textMuted font-normal">(Opcional)</span></label>
+                        <textarea id="comments-text" oninput="updateCharCount(this)" rows="3" maxlength="500" placeholder="Ej.: Los audífonos no encienden después de cargarlos por más de 3 horas." class="w-full border border-gray-300 rounded-ml p-2.5 text-xs focus:ring-2 focus:ring-ml-blue focus:border-ml-blue outline-none transition bg-gray-50 text-ml-textDark"></textarea>
+                        <div class="flex justify-end text-[10px] text-ml-textMuted">
+                            <span id="char-count">0</span>/500
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                        <button onclick="navigateTo('p2')" class="flex-1 bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-3 px-4 rounded-ml text-sm text-center shadow transition flex items-center justify-center gap-2">
+                            <span>Continuar Solicitud</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                        <button onclick="openModal('modal-cancel-request')" class="bg-gray-100 hover:bg-gray-200 text-ml-textDark font-semibold py-3 px-4 rounded-ml text-sm text-center transition">
+                            Cancelar Solicitud
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASO 2: RESPUESTA VENDEDOR & ESCALAMIENTO A SOPORTE (AUT-04 & AUT-05) -->
+            <section id="screen-p2" class="hidden space-y-4">
+                <div class="bg-ml-card rounded-ml p-5 ml-card-shadow space-y-5">
+                    
+                    <!-- BANNER DINÁMICO DE ESTADO -->
+                    <div id="status-banner" class="bg-blue-50 border border-blue-200 rounded-ml p-4 flex items-start gap-3 transition-all">
+                        <i id="status-icon" class="fa-solid fa-clock text-ml-blue text-xl mt-0.5"></i>
+                        <div>
+                            <h2 id="status-title" class="font-bold text-ml-textDark text-sm">Esperando respuesta de AudioChile</h2>
+                            <p id="status-desc" class="text-xs text-ml-textMuted mt-1">
+                                El vendedor tiene hasta <span class="font-semibold text-ml-textDark">48 horas hábiles</span> para revisar la evidencia enviada y responder.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del reclamo enviado -->
+                    <div class="border rounded-ml p-4 space-y-3 bg-gray-50/50">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="font-bold text-xs text-ml-textDark uppercase tracking-wider">Resumen de tu solicitud</h3>
+                            <span id="mediation-badge" class="hidden bg-purple-100 text-ml-purple text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-300">
+                                <i class="fa-solid fa-shield"></i> En Mediación
+                            </span>
+                        </div>
+                        
+                        <div class="text-xs space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-ml-textMuted">Motivo:</span>
+                                <span id="summary-reason" class="font-semibold text-ml-textDark">El producto llegó defectuoso o no funciona</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-ml-textMuted">Falla indicada:</span>
+                                <span id="summary-chip" class="font-semibold text-ml-textDark">No enciende</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-ml-textMuted">Archivos adjuntos:</span>
+                                <span id="summary-files-count" class="font-semibold text-ml-textDark">3 archivos (2 fotos, 1 video)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN DE ESCALAMIENTO A SOPORTE / MODERACIÓN (AUT-04) -->
+                    <div id="escalate-container" class="bg-purple-50 border border-purple-200 rounded-ml p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-headset text-ml-purple text-lg"></i>
+                            <div>
+                                <h4 class="text-xs font-bold text-purple-900">¿El vendedor no responde o desacuerdo?</h4>
+                                <p class="text-[11px] text-purple-700">Puedes solicitar la ayuda directa de un mediador de Mercado Libre.</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('modal-mediation')" class="w-full sm:w-auto bg-ml-purple hover:bg-purple-800 text-white font-bold text-xs py-2 px-3.5 rounded-ml transition shadow-sm whitespace-nowrap">
+                            Escalar a Moderación
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t">
+                        <button onclick="navigateTo('p3')" class="flex-1 bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-3 px-4 rounded-ml text-sm text-center shadow transition flex items-center justify-center gap-2">
+                            <span>Simular Aprobación y Generar Etiqueta</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                        <button onclick="openModal('modal-cancel-request')" class="bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-3 px-4 rounded-ml text-sm text-center transition border border-red-200">
+                            Cancelar Solicitud
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASO 3: ETIQUETA DE ENVÍO -->
+            <section id="screen-p3" class="hidden space-y-4">
+                <div class="bg-ml-card rounded-ml p-5 ml-card-shadow space-y-5">
+                    <div class="text-center space-y-1">
+                        <div class="w-12 h-12 bg-green-100 text-ml-green rounded-full flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h2 class="font-bold text-ml-textDark text-base">¡Tu devolución fue aprobada!</h2>
+                        <p class="text-xs text-ml-textMuted">Imprime esta etiqueta y pégala en el paquete para realizar el despacho gratis.</p>
+                    </div>
+
+                    <div class="border-2 border-dashed border-gray-300 rounded-ml p-4 bg-gray-50 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="font-bold text-xs text-ml-textDark">ETIQUETA DE ENVÍO GRATIS</span>
+                            <span class="text-[10px] bg-blue-100 text-ml-blue px-2 py-0.5 rounded-ml font-mono font-semibold">Chilexpress / Starken</span>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-center py-2 bg-white border rounded-ml p-3">
+                            <div class="flex gap-1 h-12 items-center justify-center">
+                                <div class="w-1 h-full bg-black"></div>
+                                <div class="w-2 h-full bg-black"></div>
+                                <div class="w-1 h-full bg-black"></div>
+                                <div class="w-3 h-full bg-black"></div>
+                                <div class="w-1 h-full bg-black"></div>
+                                <div class="w-2 h-full bg-black"></div>
+                                <div class="w-4 h-full bg-black"></div>
+                                <div class="w-1 h-full bg-black"></div>
+                                <div class="w-2 h-full bg-black"></div>
+                            </div>
+                            <span class="font-mono text-xs mt-1 text-ml-textMuted">ML-8849-2026-CHL</span>
+                        </div>
+
+                        <div class="text-[11px] text-ml-textMuted space-y-1">
+                            <p><span class="font-semibold text-ml-textDark">Remitente:</span> Tomás Soto (Los Ángeles, Chile)</p>
+                            <p><span class="font-semibold text-ml-textDark">Destino:</span> Centro de Distribución Mercado Libre Pudahuel, RM</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs text-ml-textMuted">
+                        <h4 class="font-bold text-ml-textDark">¿Cómo empaquetar el producto?</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Guarda el producto con todos sus accesorios en su caja original.</li>
+                            <li>Pega la etiqueta impresa sobre la bolsa o caja protectora exterior.</li>
+                            <li>Llévalo a cualquier sucursal autorizada antes del <span class="font-semibold text-ml-textDark">28 de Octubre</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                        <button onclick="downloadLabel()" class="bg-gray-100 hover:bg-gray-200 text-ml-textDark font-semibold py-3 px-4 rounded-ml text-sm text-center transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-pdf text-red-500"></i>
+                            <span>Descargar Etiqueta (PDF)</span>
+                        </button>
+                        <button onclick="navigateTo('p4')" class="flex-1 bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-3 px-4 rounded-ml text-sm text-center shadow transition flex items-center justify-center gap-2">
+                            <span>Simular Entrega a Transporte</span>
+                            <i class="fa-solid fa-truck-fast text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASO 4: TRANSPORTE -->
+            <section id="screen-p4" class="hidden space-y-4">
+                <div class="bg-ml-card rounded-ml p-5 ml-card-shadow space-y-5">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div>
+                            <h2 class="font-bold text-ml-textDark text-base">Seguimiento de la Devolución</h2>
+                            <p class="text-xs text-ml-textMuted">Código de rastreo: <span class="font-mono text-ml-textDark font-semibold">9920183742</span></p>
+                        </div>
+                        <span class="bg-green-100 text-ml-green text-xs px-2.5 py-1 rounded-full font-semibold">En Tránsito</span>
+                    </div>
+
+                    <div class="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-ml-blue">
+                        <div class="relative">
+                            <div class="absolute -left-6 top-0 w-5 h-5 rounded-full bg-ml-blue text-white flex items-center justify-center text-[10px]">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <p class="text-xs font-bold text-ml-textDark">Paquete entregado en la sucursal</p>
+                            <p class="text-[11px] text-ml-textMuted">Sucursal Los Ángeles · 21 Oct 14:30</p>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute -left-6 top-0 w-5 h-5 rounded-full bg-ml-blue text-white flex items-center justify-center text-[10px]">
+                                <i class="fa-solid fa-truck"></i>
+                            </div>
+                            <p class="text-xs font-bold text-ml-textDark">En camino al Centro de Distribución</p>
+                            <p class="text-[11px] text-ml-textMuted">En tránsito hacia Santiago · 21 Oct 18:00</p>
+                        </div>
+
+                        <div class="relative opacity-50">
+                            <div class="absolute -left-6 top-0 w-5 h-5 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-[10px]">
+                                <i class="fa-solid fa-warehouse"></i>
+                            </div>
+                            <p class="text-xs font-bold text-ml-textDark">Llegada a Bodega e Inspección</p>
+                            <p class="text-[11px] text-ml-textMuted">Estimado: 22 Oct</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                        <button onclick="navigateTo('p5')" class="flex-1 bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-3 px-4 rounded-ml text-sm text-center shadow transition flex items-center justify-center gap-2">
+                            <span>Simular Recepción en Bodega</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASO 5: BODEGA -->
+            <section id="screen-p5" class="hidden space-y-4">
+                <div class="bg-ml-card rounded-ml p-5 ml-card-shadow space-y-5">
+                    <div class="flex items-center gap-3 border-b pb-3">
+                        <div class="w-10 h-10 bg-blue-100 text-ml-blue rounded-full flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-magnifying-glass font-bold"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-ml-textDark text-base">Revisión de Control de Calidad</h2>
+                            <p class="text-xs text-ml-textMuted">Equipo técnico verificando el producto en bodega</p>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-ml p-4 space-y-3 bg-gray-50">
+                        <h3 class="font-bold text-xs text-ml-textDark uppercase tracking-wider">Criterios de Verificación en Proceso</h3>
+
+                        <div class="space-y-2 text-xs">
+                            <div class="flex items-center justify-between p-2 bg-white rounded-ml border">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-check text-ml-green"></i>
+                                    <span>Coincidencia de número de serie</span>
+                                </span>
+                                <span class="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-ml font-semibold">Validado</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 bg-white rounded-ml border">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-check text-ml-green"></i>
+                                    <span>Verificación física de la falla reportada</span>
+                                </span>
+                                <span class="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-ml font-semibold">Confirmado</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 bg-white rounded-ml border">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-spinner fa-spin text-ml-blue"></i>
+                                    <span>Integridad de accesorios y caja</span>
+                                </span>
+                                <span class="text-[10px] bg-blue-100 text-ml-blue px-2 py-0.5 rounded-ml font-semibold">En revisión</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                        <button onclick="navigateTo('p6')" class="flex-1 bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-3 px-4 rounded-ml text-sm text-center shadow transition flex items-center justify-center gap-2">
+                            <span>Aprobar Inspección y Emitir Reembolso</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASO 6: REEMBOLSO -->
+            <section id="screen-p6" class="hidden space-y-4">
+                <div class="bg-ml-card rounded-ml p-6 ml-card-shadow text-center space-y-5">
+                    <div class="w-16 h-16 bg-green-100 text-ml-green rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+
+                    <div class="space-y-1">
+                        <h2 class="font-bold text-ml-textDark text-xl">¡Reembolso emitido con éxito!</h2>
+                        <p class="text-xs text-ml-textMuted">Hemos enviado el dinero a tu método de pago original.</p>
+                    </div>
+
+                    <div class="bg-gray-50 border rounded-ml p-4 space-y-2 text-left text-xs max-w-sm mx-auto">
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-ml-textMuted">Monto reembolsado:</span>
+                            <span class="font-bold text-ml-green text-sm">$39.990</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-ml-textMuted">Medio de pago:</span>
+                            <span class="font-semibold text-ml-textDark">Tarjeta de Crédito (**** 4821)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-ml-textMuted">N° Comprobante:</span>
+                            <span class="font-mono text-ml-textDark">REF-9920193-CL</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-ml-textMuted">Acreditación:</span>
+                            <span class="font-semibold text-ml-textDark">Inmediata (1 a 3 días hábiles)</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-3">
+                        <button onclick="navigateTo('p0')" class="w-full sm:w-auto bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-3 px-8 rounded-ml text-sm text-center shadow transition inline-flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-house text-xs"></i>
+                            <span>Volver a Mis Compras</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- LOGIC JAVASCRIPT -->
+    <script>
+        const MAX_IMAGES = 5;
+        const MAX_VIDEOS = 1;
+        const MAX_TOTAL_FILES = 6;
+
+        function navigateTo(screenId) {
+            if (screenId === 'p0') {
+                document.getElementById('screen-p0').classList.remove('hidden');
+                document.getElementById('flow-container').classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            document.getElementById('screen-p0').classList.add('hidden');
+            document.getElementById('flow-container').classList.remove('hidden');
+
+            const screens = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+            screens.forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const targetScreen = document.getElementById(`screen-${screenId}`);
+            if (targetScreen) targetScreen.classList.remove('hidden');
+
+            const stepNum = parseInt(screenId.replace('p', ''));
+            updateStepperUI(stepNum);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateStepperUI(currentStep) {
+            document.getElementById('step-indicator-text').innerText = `Paso ${currentStep} de 6`;
+            const progressPercent = ((currentStep - 1) / 5) * 80;
+            document.getElementById('stepper-progress').style.width = `${progressPercent}%`;
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                if (!btn) continue;
+
+                if (i < currentStep) {
+                    btn.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-ml-green text-white shadow-md transition-all cursor-pointer";
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                } else if (i === currentStep) {
+                    btn.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-ml-blue text-white shadow-md transition-all ring-4 ring-blue-100";
+                    btn.innerHTML = i;
+                } else {
+                    btn.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-ml-textMuted transition-all";
+                    btn.innerHTML = i;
+                }
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId)?.classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId)?.classList.add('hidden');
+        }
+
+        function confirmMediation() {
+            closeModal('modal-mediation');
+
+            const banner = document.getElementById('status-banner');
+            const icon = document.getElementById('status-icon');
+            const title = document.getElementById('status-title');
+            const desc = document.getElementById('status-desc');
+            const badge = document.getElementById('mediation-badge');
+            const escalateBtn = document.getElementById('escalate-container');
+
+            banner.className = "bg-purple-50 border border-purple-300 rounded-ml p-4 flex items-start gap-3 transition-all";
+            icon.className = "fa-solid fa-scale-balanced text-ml-purple text-xl mt-0.5";
+            title.innerText = "Caso derivado a Mediación de Mercado Libre";
+            title.className = "font-bold text-purple-900 text-sm";
+            desc.innerHTML = "Un mediador tomará el caso y revisará la evidencia adjuntada. Respuesta garantizada en <strong class='text-purple-900'>menos de 24 horas</strong>.";
+            
+            badge.classList.remove('hidden');
+            escalateBtn.classList.add('hidden');
+
+            showToast("Solicitud enviada al equipo de Mediación ML", "purple");
+        }
+
+        function confirmCancelRequest() {
+            closeModal('modal-cancel-request');
+            showToast("Solicitud de devolución cancelada exitosamente", "info");
+            navigateTo('p0');
+        }
+
+        function selectChip(btn) {
+            const chips = document.querySelectorAll('.chip-btn');
+            chips.forEach(c => {
+                c.className = "chip-btn px-3 py-1.5 rounded-full border border-gray-300 bg-white text-ml-textDark hover:border-gray-400 text-xs font-semibold flex items-center gap-1.5 transition";
+                c.innerHTML = c.innerText;
+            });
+
+            btn.className = "chip-btn px-3 py-1.5 rounded-full border border-ml-blue bg-blue-50 text-ml-blue text-xs font-semibold flex items-center gap-1.5 transition";
+            btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> ${btn.innerText}`;
+
+            document.getElementById('summary-chip').innerText = btn.innerText.trim();
+        }
+
+        function updateCharCount(textarea) {
+            document.getElementById('char-count').innerText = textarea.value.length;
+        }
+
+        function getFileCounts() {
+            const fileCards = document.querySelectorAll('.file-card');
+            let imageCount = 0;
+            let videoCount = 0;
+
+            fileCards.forEach(card => {
+                const type = card.getAttribute('data-type');
+                if (type === 'image') imageCount++;
+                if (type === 'video') videoCount++;
+            });
+
+            return { images: imageCount, videos: videoCount, total: fileCards.length };
+        }
+
+        function updateFileCounterUI() {
+            const counts = getFileCounts();
+            const badge = document.getElementById('file-count-badge');
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileInput = document.getElementById('file-input');
+
+            badge.innerText = `${counts.total}/${MAX_TOTAL_FILES} archivos`;
+            document.getElementById('summary-files-count').innerText = 
+                `${counts.total} archivos (${counts.images} foto${counts.images !== 1 ? 's' : ''}, ${counts.videos} video${counts.videos !== 1 ? 's' : ''})`;
+
+            if (counts.total >= MAX_TOTAL_FILES) {
+                uploadBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                fileInput.disabled = true;
+            } else {
+                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                fileInput.disabled = false;
+            }
+        }
+
+        function removeFile(btn) {
+            const card = btn.closest('.file-card');
+            if (card) {
+                card.remove();
+                updateFileCounterUI();
+                showToast("Archivo eliminado", "info");
+            }
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            const file = files[0];
+            const isVideo = file.type.startsWith('video/');
+            const isImage = file.type.startsWith('image/');
+            const counts = getFileCounts();
+
+            if (counts.total >= MAX_TOTAL_FILES) {
+                showToast(`Has alcanzado el límite máximo de ${MAX_TOTAL_FILES} archivos.`, "warning");
+                return;
+            }
+
+            if (isImage && counts.images >= MAX_IMAGES) {
+                showToast(`Solo se permiten máximo ${MAX_IMAGES} fotos.`, "warning");
+                return;
+            }
+
+            if (isVideo && counts.videos >= MAX_VIDEOS) {
+                showToast(`Solo se permite máximo ${MAX_VIDEOS} video corto.`, "warning");
+                return;
+            }
+
+            const container = document.querySelector('#screen-p1 .grid.grid-cols-2');
+            const newCard = document.createElement('div');
+            newCard.className = "file-card relative group rounded-ml overflow-hidden border bg-gray-100 h-24";
+            newCard.setAttribute('data-type', isVideo ? 'video' : 'image');
+
+            if (isImage) {
+                const imgUrl = URL.createObjectURL(file);
+                newCard.innerHTML = `
+                    <img src="${imgUrl}" class="w-full h-full object-cover">
+                    <button onclick="removeFile(this)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 transition">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <span class="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80%]">${file.name}</span>
+                `;
+            } else if (isVideo) {
+                newCard.className = "file-card relative group rounded-ml overflow-hidden border bg-gray-900 h-24 flex items-center justify-center";
+                newCard.innerHTML = `
+                    <i class="fa-solid fa-circle-play text-white/80 text-2xl"></i>
+                    <span class="absolute top-1 left-1 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded">00:15s</span>
+                    <button onclick="removeFile(this)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 transition">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <span class="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80%]">${file.name}</span>
+                `;
+            }
+
+            container.appendChild(newCard);
+            updateFileCounterUI();
+            showToast("Archivo cargado con éxito", "success");
+            event.target.value = '';
+        }
+
+        function downloadLabel() {
+            showToast("Descargando etiqueta PDF...", "success");
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+
+            if (type === 'warning') {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            } else if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-ml-green";
+            } else if (type === 'purple') {
+                toastIcon.className = "fa-solid fa-scale-balanced text-purple-400";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-ml-blue";
+            }
+
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 3000);
+        }
+
+        document.getElementById('reason-select')?.addEventListener('change', function(e) {
+            const selectedText = e.target.options[e.target.selectedIndex].text;
+            document.getElementById('summary-reason').innerText = selectedText;
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateFileCounterUI();
+        });
+    </script>
+</body>
+</html>
