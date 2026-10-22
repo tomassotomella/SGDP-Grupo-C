@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGDP - Mercado Libre Chile | Portal de Prototipos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ml: {
+                            yellow: '#FFE600',
+                            blue: '#3483FA',
+                            blueHover: '#2968C8',
+                            green: '#00A650',
+                            purple: '#652D90',
+                            bg: '#F5F5F5',
+                            card: '#FFFFFF',
+                            textDark: '#333333',
+                            textMuted: '#666666'
+                        }
+                    },
+                    borderRadius: { 'ml': '8px' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F5F5; color: #333333; }
+        .ml-card-shadow { box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-ml-bg">
+
+    <!-- HEADER INSTITUCIONAL -->
+    <header class="bg-ml-yellow border-b border-yellow-300 py-3.5 px-4 shadow-sm">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo-1.png" alt="Mercado Libre" class="h-8 object-contain">
+                <span class="text-xs font-bold text-ml-textDark border-l border-black/20 pl-3">
+                    SGDP · Mercado Libre Chile
+                </span>
+            </div>
+            <span class="text-xs font-semibold bg-white/70 text-ml-textDark px-3 py-1 rounded-full border border-yellow-400">
+                Prototipo de Alta Fidelidad (Andes UI)
+            </span>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
+        
+        <!-- BIENVENIDA -->
+        <div class="bg-white rounded-ml p-6 ml-card-shadow border border-gray-200 text-center space-y-2">
+            <h1 class="text-2xl font-bold text-ml-textDark">Sistema de Gestión de Devoluciones y Postventa (SGDP)</h1>
+            <p class="text-xs text-ml-textMuted max-w-2xl mx-auto leading-relaxed">
+                Portal central interactivo del prototipo maquetado con el sistema de diseño <strong>Andes UI</strong>. Selecciona cualquiera de los módulos funcionales para explorar los flujos y patrones de interacción.
+            </p>
+        </div>
+
+        <!-- TARJETAS DE MÓDULOS (2x2 GRID) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <!-- MÓDULO 1: COMPRADOR -->
+            <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 flex flex-col justify-between hover:border-ml-blue transition group">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 bg-blue-50 text-ml-blue rounded-full flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <span class="text-[10px] bg-blue-100 text-ml-blue font-bold px-2.5 py-0.5 rounded-full">Vista Móvil (CX)</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-ml-textDark group-hover:text-ml-blue transition">1. Aplicación del Comprador</h2>
+                        <p class="text-xs text-ml-textMuted mt-1 leading-relaxed">
+                            Flujo de autogestión de devoluciones con línea de tiempo interactiva de 6 pasos, formulario parametrizado y zona de carga multimedia.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t mt-4">
+                    <a href="modulo_cliente.html" class="w-full bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-2.5 px-4 rounded-ml text-xs text-center transition flex items-center justify-center gap-2">
+                        <span>Ingresar a la App del Comprador</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- MÓDULO 2: VENDEDOR (SELLERS / BODEGA) -->
+            <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 flex flex-col justify-between hover:border-ml-blue transition group">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 bg-yellow-50 text-amber-600 rounded-full flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <span class="text-[10px] bg-yellow-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full">Multirrol</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-ml-textDark group-hover:text-ml-blue transition">2. Panel del Vendedor (Sellers)</h2>
+                        <p class="text-xs text-ml-textMuted mt-1 leading-relaxed">
+                            Consola de gestión de casos con temporizadores en lenguaje natural, modal de respuestas y conmutación al rol de Recepción en Bodega.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t mt-4">
+                    <a href="Modulo_Vendedor.html" class="w-full bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-2.5 px-4 rounded-ml text-xs text-center transition flex items-center justify-center gap-2">
+                        <span>Ingresar al Panel de Sellers</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- MÓDULO 3: MEDIACIÓN Y SOPORTE ML -->
+            <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 flex flex-col justify-between hover:border-ml-blue transition group">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 bg-purple-50 text-ml-purple rounded-full flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <span class="text-[10px] bg-purple-100 text-ml-purple font-bold px-2.5 py-0.5 rounded-full">Soporte Interno</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-ml-textDark group-hover:text-ml-blue transition">3. Portal de Mediación y Arbitraje</h2>
+                        <p class="text-xs text-ml-textMuted mt-1 leading-relaxed">
+                            Consola 360° para agentes de Mercado Libre con visor unificado de evidencias (video/PDF), notas privadas y emisión de dictamen vinculante.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t mt-4">
+                    <a href="Modulo_Mediacion.html" class="w-full bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-2.5 px-4 rounded-ml text-xs text-center transition flex items-center justify-center gap-2">
+                        <span>Ingresar al Portal de Mediación</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- MÓDULO 4: ANALÍTICA Y AUDITORÍA TI -->
+            <div class="bg-white rounded-ml p-5 ml-card-shadow border border-gray-200 flex flex-col justify-between hover:border-ml-blue transition group">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 bg-green-50 text-ml-green rounded-full flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <span class="text-[10px] bg-green-100 text-green-800 font-bold px-2.5 py-0.5 rounded-full">Administración TI</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-ml-textDark group-hover:text-ml-blue transition">4. Dashboard Analítico y Auditoría</h2>
+                        <p class="text-xs text-ml-textMuted mt-1 leading-relaxed">
+                            Panel ejecutivo con indicadores métricos clave (KPIs), bitácora inmutable de eventos de seguridad e itinerario de reglas de negocio.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t mt-4">
+                    <a href="Modulo_Reportabilidad_yAnalitica.html" class="w-full bg-ml-blue hover:bg-ml-blueHover text-white font-semibold py-2.5 px-4 rounded-ml text-xs text-center transition flex items-center justify-center gap-2">
+                        <span>Ingresar a Analítica y Auditoría</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-200 py-4 text-center text-xs text-ml-textMuted">
+        <p>© 2026 Mercado Libre Chile — Sistema de Gestión de Devoluciones y Postventa (SGDP)</p>
+    </footer>
+
+</body>
+</html>
